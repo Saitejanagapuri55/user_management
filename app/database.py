@@ -1,25 +1,19 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-class Database:
-    """Handles database connections and sessions."""
-    _engine = None
-    _session_factory = None
+def init_db():
+    Base.metadata.create_all(bind=engine)
 
-    @classmethod
-    def initialize(cls, database_url: str, echo: bool = False):
-        """Initialize the async engine and sessionmaker."""
-        if cls._engine is None:  # Ensure engine is created once
-            cls._engine = create_async_engine(database_url, echo=echo, future=True)
-            cls._session_factory = sessionmaker(
-                bind=cls._engine, class_=AsyncSession, expire_on_commit=False, future=True
-            )
-
-    @classmethod
-    def get_session_factory(cls):
-        """Returns the session factory, ensuring it's initialized."""
-        if cls._session_factory is None:
-            raise ValueError("Database not initialized. Call `initialize()` first.")
-        return cls._session_factory
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
