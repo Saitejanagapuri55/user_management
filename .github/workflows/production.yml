@@ -74,15 +74,15 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: kaw393939/wis_club_api:${{ github.sha }}
+          tags: saitejanagapuri/user_management_sai:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=registry,ref=kaw393939/wis_club_api:cache
+          cache-from: type=registry,ref=saitejanagapuri/user_management_sai:cache
           cache-to: type=inline,mode=max
           
       - name: Scan the Docker image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'kaw393939/wis_club_api:${{ github.sha }}'
+          image-ref: 'saitejanagapuri/user_management_sai:${{ github.sha }}'
           format: 'table'
           exit-code: 1
           ignore-unfixed: true
@@ -97,7 +97,7 @@ jobs:
       
       - name: Pull and Run Docker Image
         run: |
-          docker pull kaw393939/wis_club_api:${{ github.sha }}
-          docker stop myapp || true
-          docker rm myapp || true
-          docker run -d --name myapp -p 8000:8000 kaw393939/wis_club_api:${{ github.sha }}
+          docker pull saitejanagapuri/user_management_sai:${{ github.sha }}
+          docker stop user_management_sai || true
+          docker rm user_management_sai || true
+          docker run -d --name user_management_sai -p 8000:8000 saitejanagapuri/user_management_sai:${{ github.sha }}
