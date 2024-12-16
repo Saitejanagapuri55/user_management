@@ -190,3 +190,13 @@ async def test_list_users_unauthorized(async_client, user_token):
         headers={"Authorization": f"Bearer {user_token}"}
     )
     assert response.status_code == 403  # Forbidden, as expected for regular user
+
+from fastapi.testclient import TestClient
+from app.main import app
+
+client = TestClient(app)
+
+def test_forgot_password():
+    response = client.post("/forgot-password", json={"email": "test@example.com"})
+    assert response.status_code == 200
+    assert response.json() == {"message": "Password reset email sent successfully."}

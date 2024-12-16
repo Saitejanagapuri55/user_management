@@ -245,3 +245,24 @@ async def verify_email(user_id: UUID, token: str, db: AsyncSession = Depends(get
     if await UserService.verify_email_with_token(db, user_id, token):
         return {"message": "Email verified successfully"}
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import EmailStr
+from app.utils import send_email
+
+router = APIRouter()
+
+@router.post("/forgot-password")
+async def forgot_password(email: EmailStr):
+    # Simulate generating a reset link
+    reset_link = f"http://localhost:8000/reset-password?token=exampletoken"
+
+    # Email content
+    subject = "Reset Your Password"
+    body = f"Click the following link to reset your password: {reset_link}"
+
+    try:
+        send_email(email, subject, body)
+        return {"message": "Password reset email sent successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
