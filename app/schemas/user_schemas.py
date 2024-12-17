@@ -20,13 +20,14 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     id: int
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "id": 1,
                 "name": "John Doe",
-                "email": "john.doe@example.com",
+                "email": "john@example.com",
                 "nickname": "johndoe",
                 "profile_pic_url": "http://example.com/image.jpg"
             }
         }
+    }

@@ -1,29 +1,40 @@
-from app.schemas.user_schemas import UserCreate, UserUpdate
-from app.utils.security import hash_password, verify_password
+from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models import User
 
 class UserService:
-    def create_user(self, user_data: UserCreate):
-        """
-        Create a new user with hashed password.
-        """
-        hashed_password = hash_password(user_data.password)
-        return {
-            "email": user_data.email,
-            "name": user_data.name,
-            "nickname": user_data.nickname,
-            "profile_pic_url": user_data.profile_pic_url,
-            "hashed_password": hashed_password,
-        }
+    @staticmethod
+    async def get_by_id(db_session: AsyncSession, user_id: int):
+        result = await db_session.execute(select(User).filter_by(id=user_id))
+        return result.scalars().first()
 
-    def update_user(self, user_data: UserUpdate):
-        """
-        Update user details based on provided fields.
-        """
-        updated_data = user_data.dict(exclude_unset=True)
-        return updated_data
+    @staticmethod
+    async def get_by_email(db_session: AsyncSession, email: str):
+        result = await db_session.execute(select(User).filter_by(email=email))
+        return result.scalars().first()
 
-    def verify_user_password(self, plain_password: str, hashed_password: str) -> bool:
-        """
-        Verify a plain password against a hashed password.
-        """
-        return verify_password(plain_password, hashed_password)
+    @staticmethod
+    async def delete(db_session: AsyncSession, user_id: int):
+        user = await UserService.get_by_id(db_session, user_id)
+        if user:
+            await db_session.delete(user)
+            await db_session.commit()
+            return True
+        return False
+
+    @staticmethod
+    async def unlock_user_account(db_session: AsyncSession, user_id: int):
+        user = await UserService.get_by_id(db_session, user_id)
+        if user:
+            user.is_locked = False
+            await db_session.commit()
+            return True
+        return False
+
+    @staticmethod
+    async def create(db_session: AsyncSession, user_data: dict):
+        user = User(**user_data)
+        db_session.add(user)
+        await db_session.commit()
+        await db_session.refresh(user)
+        return user

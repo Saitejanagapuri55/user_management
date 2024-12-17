@@ -48,4 +48,4 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/user-management:latest
+        tags: saitejanagapuri/user_management_sai:latest
