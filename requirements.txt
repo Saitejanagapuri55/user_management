@@ -1,7 +1,12 @@
 fastapi
 uvicorn
-sqlalchemy>=1.4,<2.0
-pytest
-httpx
-email-validator
+sqlalchemy
 pydantic-settings
+email-validator
+httpx
+pytest
+pytest-asyncio
+pytest-cov
+python-dotenv
+passlib[bcrypt]
+pyjwt

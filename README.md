@@ -1,17 +1,9 @@
-# User Management System
-
-## Description
-A FastAPI-based user management system that supports user registration, retrieval, and email notifications.
+## User Management System
+This project is a FastAPI-based User Management System. It implements core user management features such as creating users and retrieving basic information.
 
 ## Features
-- User registration with email validation.
-- User retrieval by ID.
-- SQLite database integration.
-- Fully tested with Pytest.
-- Dockerized for easy deployment.
-
-## Setup Instructions
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/project-name.git
-   cd project-name
+# User Creation: Register users with their name, email, and password.
+# Database Integration: SQLite backend for simplicity.
+# Environment Configuration: .env file integration for email services.
+# Dockerized Deployment: Use Docker to build and deploy the system.
+# Testing: Unit and integration tests using pytest.

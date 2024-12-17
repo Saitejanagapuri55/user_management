@@ -1,3 +1,2 @@
-from .email_utils import send_email
-
-__all__ = ["send_email"]
+def send_email(recipient: str, subject: str, body: str):
+    print(f"Mock email sent to {recipient} with subject '{subject}'.")

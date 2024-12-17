@@ -1,7 +1,12 @@
 import pytest
-from app.database import SessionLocal
+from app.db import Base, engine, SessionLocal
 
-@pytest.fixture
-async def db_session():
-    async with SessionLocal() as session:
-        yield session
+@pytest.fixture(scope="module")
+def test_db():
+    Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+        Base.metadata.drop_all(bind=engine)

@@ -1,17 +1,9 @@
-import smtplib
-from email.mime.text import MIMEText
+class SMTPClient:
+    def __init__(self, server: str, port: int, username: str, password: str):
+        self.server = server
+        self.port = port
+        self.username = username
+        self.password = password
 
-def send_email(to_email: str, subject: str, body: str):
-    smtp_server = "sandbox.smtp.mailtrap.io"
-    smtp_port = 2525
-    smtp_username = "your_username"
-    smtp_password = "your_password"
-
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = "no-reply@example.com"
-    msg["To"] = to_email
-
-    with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.login(smtp_username, smtp_password)
-        server.send_message(msg)
+    def send_email(self, recipient: str, subject: str, body: str):
+        print(f"Mock email sent to {recipient} with subject '{subject}'.")

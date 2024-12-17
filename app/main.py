@@ -1,11 +1,10 @@
 from fastapi import FastAPI
-from app.routes import users
-from app.db import init_db
+from app.routes.user_routes import router as user_router
 
-app = FastAPI(title="User Management System")
+app = FastAPI()
 
-@app.on_event("startup")
-async def startup():
-    await init_db()
+app.include_router(user_router, prefix="/users", tags=["users"])
 
-app.include_router(users.router)
+@app.get("/")
+def root():
+    return {"message": "User Management System is running!"}

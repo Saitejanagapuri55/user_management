@@ -1,10 +1,32 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, HttpUrl
+from typing import Optional
 
-class UserCreate(BaseModel):
-    email: EmailStr
+class UserBase(BaseModel):
     name: str
+    email: EmailStr
+    nickname: Optional[str] = None
+    profile_pic_url: Optional[HttpUrl] = None
 
-class UserResponse(BaseModel):
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    nickname: Optional[str] = None
+    profile_pic_url: Optional[HttpUrl] = None
+
+class UserResponse(UserBase):
     id: int
-    email: EmailStr
-    name: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "nickname": "johndoe",
+                "profile_pic_url": "http://example.com/image.jpg"
+            }
+        }
