@@ -3,15 +3,30 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - development
+      - development  # Trigger the workflow on the development branch
   pull_request:
     branches:
       - development
 
 jobs:
   build-and-test:
-    name: Build and Test
+    name: Build, Test, and Push to DockerHub
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16.2
+        env:
+          POSTGRES_DB: myappdb
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U user -d myappdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       # Step 1: Checkout code
@@ -30,9 +45,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 4: Run tests with pytest
-      - name: Run tests with pytest
-        env:
-          PYTHONPATH: ${{ github.workspace }}  # Add root directory to module search path
+      # Step 4: Set DATABASE_URL for tests
+      - name: Set DATABASE_URL
         run: |
-          pytest
+          echo "DATABASE_URL=postgresql://user:password@localhost:5432/myappdb" >> $GITHUB_ENV
+
+      # Step 5: Run tests with pytest
+      - name: Run tests with pytest
+        run: pytest
+
+      # Step 6: Log in to DockerHub
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: saitejas0511@gmail.com
+          password: Sailentt@55
+
+      # Step 7: Build and push Docker image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: saitejanagapuri/user_management_sai:latest
