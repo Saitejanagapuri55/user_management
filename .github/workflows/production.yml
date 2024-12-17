@@ -44,14 +44,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Step 3: Cache Python Dependencies
-      - name: Cache Python Packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      # Step 3: Wait for PostgreSQL to be Ready
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432 -U user; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
 
       # Step 4: Install Dependencies
       - name: Install Dependencies
@@ -59,15 +58,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 5: Set PYTHONPATH to fix ModuleNotFoundError
-      - name: Set PYTHONPATH
+      # Step 5: Set Environment Variables
+      - name: Set Environment Variables
         run: |
           echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/myappdb" >> $GITHUB_ENV
 
       # Step 6: Run Tests with Pytest
       - name: Run Tests with Pytest
-        env:
-          DATABASE_URL: postgresql+asyncpg://user:password@localhost:5432/myappdb
         run: pytest
 
   build-and-push-docker:
@@ -102,7 +100,7 @@ jobs:
           cache-from: type=registry,ref=saitejanagapuri/user_management_sai:cache
           cache-to: type=inline,mode=max
 
-      # Step 5: Scan Docker Image for Security Vulnerabilities
+      # Step 5: Scan Docker Image for Vulnerabilities
       - name: Scan the Docker Image
         uses: aquasecurity/trivy-action@master
         with:
