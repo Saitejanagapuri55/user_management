@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - develop   # Trigger on develop branch
   pull_request:
     branches:
-      - main
+      - develop
 
 jobs:
   build-and-test:
@@ -36,7 +36,7 @@ jobs:
 
   build-and-push:
     name: Build and Push Docker Image
-    needs: build-and-test  # Only run if tests pass
+    needs: build-and-test  # Only runs if tests pass
     runs-on: ubuntu-latest
 
     steps:
@@ -58,4 +58,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: saitejanagapuri/user_management_sai:latest
+          tags: saitejanagapuri/user_management_sai:develop
