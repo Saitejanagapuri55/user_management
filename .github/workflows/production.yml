@@ -67,4 +67,8 @@ jobs:
 
       # Step 6: Run Tests with Pytest
       - name: Run Tests with Pytest
+        env:
+          DATABASE_URL: postgresql+asyncpg://user:password@localhost:5432/myappdb
+          PYTHONPATH: "${{ github.workspace }}"  # Add the root directory to PYTHONPATH
         run: pytest --maxfail=1 --disable-warnings
+
