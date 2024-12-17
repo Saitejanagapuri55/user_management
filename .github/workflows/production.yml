@@ -6,7 +6,7 @@ on:
       - develop   # Trigger on develop branch
   pull_request:
     branches:
-      - develop
+      - development
 
 jobs:
   build-and-test:
