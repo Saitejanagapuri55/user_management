@@ -49,3 +49,17 @@ class Settings(BaseSettings):
 
 # Instantiate settings to be imported in your application
 settings = Settings()
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    mail_username: str
+    mail_password: str
+    mail_server: str
+    mail_port: int
+    mail_use_tls: bool
+
+    # Allow extra fields
+    model_config = SettingsConfigDict(extra="allow")
+
+settings = Settings()
