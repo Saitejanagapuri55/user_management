@@ -38,6 +38,7 @@ jobs:
     # Run Tests
     - name: Run Tests
       run: |
+        docker compose down || true
         docker compose up -d
         docker compose exec fastapi pytest --maxfail=1 --disable-warnings
         docker compose down

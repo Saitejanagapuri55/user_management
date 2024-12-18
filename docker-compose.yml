@@ -28,6 +28,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      PYTHONPATH: /app
       DATABASE_URL: postgresql+psycopg2://user:password@postgres:5432/myappdb
     depends_on:
       postgres:
