@@ -1,19 +1,19 @@
-import sys
 import os
-
-# Add the parent directory of the 'app' directory to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-from app.main import app  # Now this should work
+import sys
+from app.main import app
 from fastapi.testclient import TestClient
+
+# Conditionally set DATABASE_URL
+DATABASE_URL = os.getenv("TEST_DATABASE_URL", "postgresql+psycopg2://user:password@localhost:5432/myappdb")
+os.environ["DATABASE_URL"] = DATABASE_URL
 
 client = TestClient(app)
 
-# 1. Health check
 def test_health_check():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "running", "service": "User Management API"}
+
 
 # 2. Create user
 def test_create_user():

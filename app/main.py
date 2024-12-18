@@ -1,65 +1,57 @@
-from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy.orm import Session
-from app.db import SessionLocal, engine
-from app.models.user_model import User
-from pydantic import BaseModel, EmailStr
-from sqlalchemy.exc import SQLAlchemyError
-from app.models.user_model import Base
+from fastapi import FastAPI, HTTPException, status
+from pydantic import BaseModel, EmailStr, Field
+from typing import List
+from sqlalchemy import Column, Integer, String, create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Create database tables
+DATABASE_URL = "postgresql+psycopg2://user:password@postgres:5432/myappdb"
+
+# SQLAlchemy Setup
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+Base = declarative_base()
+
+# Database Model
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+
 Base.metadata.create_all(bind=engine)
 
-# Initialize FastAPI app
-app = FastAPI(
-    title="User Management System",
-    description="A robust User Management API built with FastAPI and PostgreSQL.",
-    version="1.0.0",
-)
-
-# Dependency to get the database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# Pydantic schema
-class UserCreate(BaseModel):
-    name: str
+# Pydantic Schema
+class UserSchema(BaseModel):
+    name: str = Field(..., min_length=1)
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=6)
 
-# Health check endpoint
-@app.get("/health", tags=["Health"])
-async def health_check():
+class UserResponseSchema(BaseModel):
+    id: int
+    name: str
+    email: str
+
+# Initialize FastAPI App
+app = FastAPI()
+
+@app.get("/health")
+def health_check():
     return {"status": "running", "service": "User Management API"}
 
-# Create user endpoint
-@app.post("/users/", tags=["Users"])
-async def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    # Validate inputs
-    if not user.name.strip() or not user.email.strip() or not user.password.strip():
-        raise HTTPException(status_code=400, detail="Fields cannot be empty")
-    if len(user.password) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters long.")
-
-    # Check for duplicate email
+@app.post("/users/", response_model=UserResponseSchema, status_code=status.HTTP_200_OK)
+def create_user(user: UserSchema):
+    db = SessionLocal()
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="This email is already registered.")
+    new_user = User(name=user.name, email=user.email, password=user.password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 
-    # Create new user
-    try:
-        new_user = User(name=user.name, email=user.email, password=user.password)
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        return new_user
-    except SQLAlchemyError:
-        raise HTTPException(status_code=500, detail="Database error occurred.")
-
-# Retrieve all users
-@app.get("/users/", tags=["Users"])
-async def get_users(db: Session = Depends(get_db)):
+@app.get("/users/", response_model=List[UserResponseSchema])
+def get_users():
+    db = SessionLocal()
     return db.query(User).all()
